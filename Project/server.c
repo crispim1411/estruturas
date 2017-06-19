@@ -12,6 +12,8 @@
 #include <sys/ioctl.h>
 #include <net/if.h>
 
+#define ETH_INTERFACE "enp63s0"
+
 void error(char *msg)
 {
     perror(msg);
@@ -36,7 +38,7 @@ int main(int argc, char *argv[])
         error("ERROR opening socket");
 
      ifr.ifr_addr.sa_family = AF_INET;
-     strncpy(ifr.ifr_name, "eno1", IFNAMSIZ-1);
+     strncpy(ifr.ifr_name, ETH_INTERFACE, IFNAMSIZ-1);
      ioctl(sockfd,SIOCGIFADDR, &ifr);
      printf("IP: %s\n",inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr));
 
