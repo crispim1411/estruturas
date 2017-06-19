@@ -7,6 +7,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h> 
+#include <ncurses.h>
+
 
 void error(char *msg)
 {
@@ -16,6 +18,37 @@ void error(char *msg)
 
 int main(int argc, char *argv[])
 {
+    // WINDOWS SETTINGS
+    // -- Parameters --
+    WINDOW *top;
+    WINDOW *bottom;
+    int line=1; // line position of top
+    int input=1; // line position of top
+    int maxx, maxy; // screen dimensions
+
+    // -- Setup Windows --
+    initscr();
+    getmaxyx(stdscr, maxy, maxx); // get max values
+
+    top = newwin(maxy/2, maxx, 0, 0); // create top window
+    bottom = newwin(maxy/2, maxx, maxy/2, 0); // create bottom window
+
+    scrollok(top, TRUE);
+    scrollok(bottom, TRUE);
+    box(top, '|', '=');
+    box(bottom, '|', '-');
+
+    wsetscrreg(top, 1, maxy/2-2);
+    wsetscrreg(bottom, 1, maxy/2-2);
+    
+    //refresh();
+    wrefresh(top);
+    wrefresh(bottom);
+
+   
+    //
+    //
+
     int sockfd, portno, n;
 
     struct sockaddr_in serv_addr;
