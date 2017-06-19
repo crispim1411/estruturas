@@ -30,16 +30,17 @@ int main(int argc, char *argv[])
     initscr();
     getmaxyx(stdscr, maxy, maxx); // get max values
 
-    top = newwin(maxy/2, maxx, 0, 0); // create top window
-    bottom = newwin(maxy/2, maxx, maxy/2, 0); // create bottom window
+    top = newwin(maxy-3, maxx, 0, 0); // create top window
+    bottom = newwin(3, maxx, maxy-3, 0); // create bottom window
 
     scrollok(top, TRUE);
     scrollok(bottom, TRUE);
     box(top, '|', '=');
     box(bottom, '|', '-');
 
-    wsetscrreg(top, 1, maxy/2-2);
-    wsetscrreg(bottom, 1, maxy/2-2);
+    wsetscrreg(top, 1, maxy-3);
+    wsetscrreg(bottom, maxy-3, maxy);
+
     
     //refresh();
     wrefresh(top);
@@ -77,9 +78,15 @@ int main(int argc, char *argv[])
     if (connect(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr)) < 0) 
         error("ERROR connecting");
     while (1) {
-        printf("Please enter the message: ");
+        //printf("Please enter the message: ");
+        mvwprintw(bottom, 1, 2, "Please enter the message: ");
+        wrefresh(bottom);
         bzero(buffer,256);
-        fgets(buffer,255,stdin);
+        //fgets(buffer,255,stdin);
+        wgetnstr(bottom, buffer, 256);
+        //
+        endwin();
+        //
         n = write(sockfd,buffer,strlen(buffer));
         if (n < 0) 
              error("ERROR writing to socket");
