@@ -18,6 +18,49 @@ void error(char *msg)
 
 int main(int argc, char *argv[])
 {
+
+    int sockfd, portno, n;
+
+    struct sockaddr_in serv_addr;
+    struct hostent *server;
+
+    char username[10];
+    char buffer[256], auxbuffer[256];
+    if (argc < 3) {
+       fprintf(stderr,"usage %s hostname port\n", argv[0]);
+       exit(0);
+    }
+    portno = atoi(argv[2]);
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockfd < 0) 
+        error("ERROR opening socket");
+    server = gethostbyname(argv[1]);
+    if (server == NULL) {
+        fprintf(stderr,"ERROR, no such host\n");
+        exit(0);
+    }
+    bzero((char *) &serv_addr, sizeof(serv_addr));
+    serv_addr.sin_family = AF_INET;
+    bcopy((char *)server->h_addr, 
+         (char *)&serv_addr.sin_addr.s_addr,
+         server->h_length);
+    serv_addr.sin_port = htons(portno);
+    if (connect(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr)) < 0) 
+        error("ERROR connecting");
+
+    // Getting a username
+    printf("Enter your username: ");
+    fgets(username, 7, stdin);
+    for (n = 0; n < strlen(username); n++) {
+        if (username[n] == '\n') {
+            username[n] = ':';
+            username[n+1] = ' ';
+            username[n+2] = '\0';
+            break;
+        }
+    }
+
+
     // WINDOWS SETTINGS
     // -- Parameters --
     WINDOW *top;
@@ -41,62 +84,41 @@ int main(int argc, char *argv[])
     wsetscrreg(top, 1, maxy-3);
     wsetscrreg(bottom, maxy-3, maxy);
 
-    
     //refresh();
     wrefresh(top);
     wrefresh(bottom);
-
-   
     //
     //
 
-    int sockfd, portno, n;
-
-    struct sockaddr_in serv_addr;
-    struct hostent *server;
-
-    char buffer[256];
-    if (argc < 3) {
-       fprintf(stderr,"usage %s hostname port\n", argv[0]);
-       exit(0);
-    }
-    portno = atoi(argv[2]);
-    sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd < 0) 
-        error("ERROR opening socket");
-    server = gethostbyname(argv[1]);
-    if (server == NULL) {
-        fprintf(stderr,"ERROR, no such host\n");
-        exit(0);
-    }
-    bzero((char *) &serv_addr, sizeof(serv_addr));
-    serv_addr.sin_family = AF_INET;
-    bcopy((char *)server->h_addr, 
-         (char *)&serv_addr.sin_addr.s_addr,
-         server->h_length);
-    serv_addr.sin_port = htons(portno);
-    if (connect(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr)) < 0) 
-        error("ERROR connecting");
     while (1) {
         //printf("Please enter the message: ");
-        mvwprintw(bottom, 1, 2, "Please enter the message: ");
+        mvwprintw(bottom, 1, 2, "%s", username);
         wrefresh(bottom);
         bzero(buffer,256);
+        bzero(auxbuffer, 256);
         //fgets(buffer,255,stdin);
-        wgetnstr(bottom, buffer, 256);
+        wgetnstr(bottom, buffer, 255);
+        strcat(auxbuffer, username);
+        strncat(auxbuffer, buffer, 200);
         //
-        endwin();
         //
-        n = write(sockfd,buffer,strlen(buffer));
+        n = write(sockfd,auxbuffer,strlen(auxbuffer));
         if (n < 0) 
              error("ERROR writing to socket");
         bzero(buffer,256);
-        puts("1");
+        //puts("1");
         n = read(sockfd,buffer,255);
-        puts("2");
-        if (n < 0) 
-             error("ERROR reading from socket");
-        printf("%s\n",buffer);
+        //puts("2");
+        if (n < 0) {
+            endwin();
+            error("ERROR reading from socket");
+        }
+        
+        //printf("%s\n",buffer);
+        mvwprintw(top, 1, 2, "%s\n", buffer);
+        wrefresh(top);
     }
+    endwin();
+
     return 0;
 }
