@@ -12,7 +12,7 @@
 #include <sys/ioctl.h>
 #include <net/if.h>
 
-#define ETH_INTERFACE "enp63s0"
+#define ETH_INTERFACE "wlp3s0"
 
 void error(char *msg)
 {
@@ -50,11 +50,11 @@ int main(int argc, char *argv[])
      if (bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
 	  error("ERROR on binding");
      listen(sockfd,5);
-     puts("1");
+     //puts("1");
      clilen = sizeof(cli_addr);
-     puts("2");
+     //puts("2");
      newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
-     puts("3");
+     //puts("3");
      while(1){
 	     if (newsockfd < 0) 
 		  error("ERROR on accept");

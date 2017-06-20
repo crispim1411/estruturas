@@ -92,6 +92,7 @@ int main(int argc, char *argv[])
 
     while (1) {
         //printf("Please enter the message: ");
+        mvwprintw(bottom, 1, 2, "                               ");
         mvwprintw(bottom, 1, 2, "%s", username);
         wrefresh(bottom);
         bzero(buffer,256);
